@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>My Python Demo</title>
+  <style>
+    body { background:#141414; color:#eee; font:20px monospace; padding:20px; }
+    pre { margin:0; white-space:pre-wrap; display:inline; }
+    #in { background:transparent; border:none; outline:none; color:#eee;
+          font:inherit; width:60%; }
+  </style>
+</head>
+<body>
+  <pre id="out"></pre><input id="in" style="display:none" autocomplete="off">
+
+  <script src="https://cdn.jsdelivr.net/npm/skulpt@1.2.0/dist/skulpt.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/skulpt@1.2.0/dist/skulpt-stdlib.js"></script>
+
+  <script type="text/plain" id="py">
+print("Welcome to Treasure Island.")
+print("Your mission is to find the treasure.")
+print("You're at a cross road. Where do you want to go?\n\tType 'left' or 'right'")
+left_or_right = input()
+if left_or_right.lower() == "left":
+    waiting_for_boat = input("You've come to a lake. There is an island in the middle of the lake.\n\tType 'wait' to wait for a boat. Type 'swim' to swim across \n")
+    if waiting_for_boat.lower() == "wait":
+        door_color = input("You arrived at the island unharmed. There is a house with 3 doors."
+              "\n\tOne red, one yellow and one blue. Which color do you choose? \n")
+        if door_color.lower() == "red":
+            print("It's a room full of fire. Game Over!")
+        elif door_color.lower() == "yellow":
+            print("You found the treasure!! You Win!")
+        elif door_color.lower() == "blue":
+            print("You enter a room of beasts. Game Over!")
+        else:
+            print("Game Over!")
+    elif waiting_for_boat.lower() == "swim":
+        print("You get attacked by an angry trout. Game Over!")
+    else:
+        print("Attacked by trout. Game Over!")
+elif left_or_right.lower() == "right":
+    print("You fell into a hole. Game Over!")
+else:
+    print("You fell into a hole. Game Over!")
+  </script>
+
+  <script>
+    const code = document.getElementById('py').textContent.replace(/^\n/, '');
+
+    const out = document.getElementById('out');
+    const box = document.getElementById('in');
+
+    function ask(prompt) {
+      out.textContent += prompt;
+      box.style.display = 'inline';
+      box.focus();
+      return new Promise(resolve => {
+        box.onkeydown = e => {
+          if (e.key === 'Enter') {
+            const v = box.value;
+            box.value = '';
+            box.style.display = 'none';
+            out.textContent += v + '\n';
+            resolve(v);
+          }
+        };
+      });
+    }
+
+    Sk.configure({
+      output: text => out.textContent += text,
+      inputfun: ask,
+      inputfunTakesPrompt: true,
+      read: f => {
+        if (!Sk.builtinFiles || !Sk.builtinFiles.files[f]) throw "File not found: " + f;
+        return Sk.builtinFiles.files[f];
+      }
+    });
+
+    Sk.misceval.asyncToPromise(() =>
+      Sk.importMainWithBody("<stdin>", false, code, true)
+    ).catch(err => out.textContent += "\n" + err.toString());
+  </script>
+</body>
+</html>
