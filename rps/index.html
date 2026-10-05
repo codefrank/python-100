@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>My Python Demo</title>
+  <style>
+    body { background:#141414; color:#eee; font:20px monospace; padding:20px; }
+    pre { margin:0; white-space:pre-wrap; display:inline; }
+    #in { background:transparent; border:none; outline:none; color:#eee;
+          font:inherit; width:60%; }
+  </style>
+</head>
+<body>
+  <pre id="out"></pre><input id="in" style="display:none" autocomplete="off">
+
+  <script src="https://cdn.jsdelivr.net/npm/skulpt@1.2.0/dist/skulpt.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/skulpt@1.2.0/dist/skulpt-stdlib.js"></script>
+
+  <script type="text/plain" id="py">
+import random
+rock = '''
+    _______
+---'   ____)
+      (_____)
+      (_____)
+      (____)
+---.__(___)
+'''
+
+paper = '''
+    _______
+---'   ____)____
+          ______)
+          _______)
+         _______)
+---.__________)
+'''
+
+scissors = '''
+    _______
+---'   ____)____
+          ______)
+       __________)
+      (____)
+---.__(___)
+'''
+list_rps = [rock, paper, scissors]
+computer_select = list_rps[random.randint(0, len(list_rps) - 1)]
+user_select = int(input("What do you choose? Type 0 for Rock, 1 for Paper or 2 for Scissors.\n"))
+
+if user_select == 0:
+    print("You chose: Rock" +rock)
+    if computer_select == rock:
+        print("Computer chose: Rock"+rock)
+        print("Draw!")
+    elif computer_select == paper:
+        print("Computer chose: Paper"+paper)
+        print("Computer wins!")
+    elif computer_select == scissors:
+        print("Computer chose: Scissors"+scissors)
+        print("You Win!")
+elif user_select == 1:
+    print("You chose: Paper" + paper)
+    if computer_select == rock:
+        print("Computer chose: Rock" + rock)
+        print("You win!")
+    elif computer_select == paper:
+        print("Computer chose: Paper" + paper)
+        print("Draw!")
+    elif computer_select == scissors:
+        print("Computer chose: Scissors" + scissors)
+        print("Computer wins!")
+elif user_select == 2:
+    print("You chose: Scissors" + scissors)
+    if computer_select == rock:
+        print("Computer chose: Rock" + rock)
+        print("Computer wins!")
+    elif computer_select == paper:
+        print("Computer chose: Paper" + paper)
+        print("You win!")
+    elif computer_select == scissors:
+        print("Computer chose: Scissors" + scissors)
+        print("Draw!")
+else:
+    print("Invalid input. Try again.")
+print("Game Over!!")
+</script>
+
+  <script>
+    const code = document.getElementById('py').textContent.replace(/^\n/, '');
+
+    const out = document.getElementById('out');
+    const box = document.getElementById('in');
+
+    function ask(prompt) {
+      out.textContent += prompt;
+      box.style.display = 'inline';
+      box.focus();
+      return new Promise(resolve => {
+        box.onkeydown = e => {
+          if (e.key === 'Enter') {
+            const v = box.value;
+            box.value = '';
+            box.style.display = 'none';
+            out.textContent += v + '\n';
+            resolve(v);
+          }
+        };
+      });
+    }
+
+    Sk.configure({
+      output: text => out.textContent += text,
+      inputfun: ask,
+      inputfunTakesPrompt: true,
+      read: f => {
+        if (!Sk.builtinFiles || !Sk.builtinFiles.files[f]) throw "File not found: " + f;
+        return Sk.builtinFiles.files[f];
+      }
+    });
+
+    Sk.misceval.asyncToPromise(() =>
+      Sk.importMainWithBody("<stdin>", false, code, true)
+    ).catch(err => out.textContent += "\n" + err.toString());
+  </script>
+</body>
+</html>
