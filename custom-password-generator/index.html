@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>My Python Demo</title>
+  <style>
+    body { background:#141414; color:#eee; font:20px monospace; padding:20px; }
+    pre { margin:0; white-space:pre-wrap; display:inline; }
+    #in { background:transparent; border:none; outline:none; color:#eee;
+          font:inherit; width:60%; }
+  </style>
+</head>
+<body>
+  <pre id="out"></pre><input id="in" style="display:none" autocomplete="off">
+
+  <script src="https://cdn.jsdelivr.net/npm/skulpt@1.2.0/dist/skulpt.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/skulpt@1.2.0/dist/skulpt-stdlib.js"></script>
+
+  <script type="text/plain" id="py">
+import random
+letters = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z']
+numbers = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']
+symbols = ['!', '#', '$', '%', '&', '(', ')', '*', '+']
+
+print("Welcome to the PyPassword Generator!")
+nr_letters = int(input("How many letters would you like in your password?\n"))
+nr_symbols = int(input(f"How many symbols would you like?\n"))
+nr_numbers = int(input(f"How many numbers would you like?\n"))
+
+password = ""
+for num in range(nr_letters):
+    password += random.choice(letters)
+
+for num in range(nr_symbols):
+    password += random.choice(symbols)
+
+for num in range(nr_numbers):
+    password += random.choice(numbers)
+
+list_password = list(password)
+random.shuffle(list_password)
+password_final = "".join(list_password)
+print(f"Here is your password -> {password_final}")
+
+
+
+
+</script>
+
+  <script>
+    const code = document.getElementById('py').textContent.replace(/^\n/, '');
+
+    const out = document.getElementById('out');
+    const box = document.getElementById('in');
+
+    function ask(prompt) {
+      out.textContent += prompt;
+      box.style.display = 'inline';
+      box.focus();
+      return new Promise(resolve => {
+        box.onkeydown = e => {
+          if (e.key === 'Enter') {
+            const v = box.value;
+            box.value = '';
+            box.style.display = 'none';
+            out.textContent += v + '\n';
+            resolve(v);
+          }
+        };
+      });
+    }
+
+    Sk.configure({
+      output: text => out.textContent += text,
+      inputfun: ask,
+      inputfunTakesPrompt: true,
+      read: f => {
+        if (!Sk.builtinFiles || !Sk.builtinFiles.files[f]) throw "File not found: " + f;
+        return Sk.builtinFiles.files[f];
+      }
+    });
+
+    Sk.misceval.asyncToPromise(() =>
+      Sk.importMainWithBody("<stdin>", false, code, true)
+    ).catch(err => out.textContent += "\n" + err.toString());
+  </script>
+</body>
+</html>
