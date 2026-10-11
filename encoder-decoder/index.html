@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>My Python Demo</title>
+  <style>
+    body { background:#141414; color:#eee; font:20px monospace; padding:20px; }
+    pre { margin:0; white-space:pre-wrap; display:inline; }
+    #in { background:transparent; border:none; outline:none; color:#eee;
+          font:inherit; width:60%; }
+  </style>
+</head>
+<body>
+  <pre id="out"></pre><input id="in" style="display:none" autocomplete="off">
+
+  <script src="https://cdn.jsdelivr.net/npm/skulpt@1.2.0/dist/skulpt.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/skulpt@1.2.0/dist/skulpt-stdlib.js"></script>
+
+  <script type="text/plain" id="py">
+import art
+
+print(art.logo)
+alphabet = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z']
+
+def caesar(original_text, shift_amount, encode_or_decode):
+    output_text = ""
+    if encode_or_decode == "decode":
+        shift_amount *= -1
+    for letter in original_text:
+
+        if letter in alphabet:
+            shifted_position = alphabet.index(letter) + shift_amount
+            shifted_position %= len(alphabet)
+            output_text += alphabet[shifted_position]
+        else:
+            output_text += letter
+
+    print(f"Here is the {encode_or_decode}d result: {output_text}")
+
+game_over = False
+while not game_over:
+    direction = input("Type 'encode' to encrypt, type 'decode' to decrypt:\n").lower()
+    text = input("Type your message:\n").lower()
+    shift = int(input("Type the shift number:\n"))
+    caesar(original_text=text, shift_amount=shift, encode_or_decode=direction)
+    play_again = input(f"Type 'yes' if you want to go again. Otherwise type 'no'.\n").lower()
+    if play_again == "no":
+        game_over = True
+
+</script>
+
+  <script>
+    const code = document.getElementById('py').textContent.replace(/^\n/, '');
+
+    const out = document.getElementById('out');
+    const box = document.getElementById('in');
+
+    function ask(prompt) {
+      out.textContent += prompt;
+      box.style.display = 'inline';
+      box.focus();
+      return new Promise(resolve => {
+        box.onkeydown = e => {
+          if (e.key === 'Enter') {
+            const v = box.value;
+            box.value = '';
+            box.style.display = 'none';
+            out.textContent += v + '\n';
+            resolve(v);
+          }
+        };
+      });
+    }
+
+    Sk.configure({
+      output: text => out.textContent += text,
+      inputfun: ask,
+      inputfunTakesPrompt: true,
+      read: f => {
+        if (!Sk.builtinFiles || !Sk.builtinFiles.files[f]) throw "File not found: " + f;
+        return Sk.builtinFiles.files[f];
+      }
+    });
+
+    Sk.misceval.asyncToPromise(() =>
+      Sk.importMainWithBody("<stdin>", false, code, true)
+    ).catch(err => out.textContent += "\n" + err.toString());
+  </script>
+</body>
+</html>
